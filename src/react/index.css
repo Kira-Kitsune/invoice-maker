@@ -1,0 +1,101 @@
+body {
+    -webkit-app-region: no-drag;
+    margin: 0;
+    background-color: #353535;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.page {
+    margin-left: 175px;
+    padding-left: 20px;
+}
+
+.topbar {
+    -webkit-app-region: drag;
+    width: calc(100vw - 175px);
+    margin-left: 175px;
+    height: 30px;
+    display: flex;
+    color: #353535;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ffbf00;
+    font-weight: bolder;
+}
+
+.navLink {
+    -webkit-app-region: no-drag;
+    padding: 10px 15px 5px 15px;
+    cursor: pointer;
+}
+
+.closeNavLink {
+    -webkit-app-region: no-drag;
+    padding: 10px 15px 5px 15px;
+    cursor: pointer;
+}
+
+.closeNavLink:hover {
+    background-color: #d41324;
+    color: #fefcfc;
+}
+
+.navLink:hover {
+    background-color: #353535;
+    color: #ffbf00;
+}
+
+.Form {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.Form p {
+    color: rgb(240, 46, 46);
+    margin: 0px;
+    padding: 0px 0px 0px 15px;
+    display: block;
+    font-size: 12px;
+    text-align: left;
+}
+
+.warning {
+    color: rgb(240, 46, 46);
+    margin: 10px;
+    display: block;
+    font-size: 12px;
+    text-align: left;
+}
+
+.button {
+    color: black;
+    border: 0;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-right: 10px;
+    height: 24px;
+}
+
+.Form input,
+.Form textarea,
+.Form select {
+    width: 100%;
+    padding: 6px 10px;
+    margin: 10px;
+    border: 1px solid black;
+    border-radius: 4px;
+    box-sizing: border-box;
+    display: block;
+}
+
+.Form button {
+    background: #ffbf00;
+    width: 40%;
+    color: black;
+    border: 0;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+}
