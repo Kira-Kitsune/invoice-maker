@@ -28,10 +28,9 @@ async function createPDF(pdfInfo: invoiceInfo) {
         } = pdfInfo;
         const { invoiceNumber, companyName } = client;
 
-        console.log(pdfInfo);
-
         const canvas = createCanvas(595, 842);
         const ctx = canvas.getContext('2d');
+
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, 595, 842);
 
@@ -140,10 +139,13 @@ async function createPDF(pdfInfo: invoiceInfo) {
         ctx.fillText(`PH: ${phoneNumber}`, 380, y);
         y += 14;
         ctx.fillText(`${cityName}, ${zipCode}`, x, y);
-        if (aBN) ctx.fillText(`ABN: ${aBN}`, 380, y);
+        if (aBN && aBN !== 'null') ctx.fillText(`ABN: ${aBN}`, 380, y);
         y += 14;
         ctx.fillText(`${state}, ${country}`, x, y);
-        if (websiteURL) ctx.fillText(`WEB: ${websiteURL}`, 380, y);
+        if (websiteURL && websiteURL !== 'null') {
+            if (!aBN && aBN === 'null') y -= 14;
+            ctx.fillText(`WEB: ${websiteURL}`, 380, y);
+        }
 
         reset();
         ctx.font = font(24, 'bold');
@@ -342,10 +344,18 @@ async function createPDF(pdfInfo: invoiceInfo) {
 
         ctx.font = font(10);
         let notesLine = '';
-        y += 12;
         x += 5;
+        y += 12;
+
         for (const str of notes.split(' ')) {
-            if (ctx.measureText(notesLine + ' ' + str).width >= 330) {
+            const testLine = notesLine + ' ' + str;
+
+            // Use measureText at a later date when it works, temp work around
+            const width =
+                'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod'
+                    .length;
+
+            if (testLine.length >= width) {
                 if (y > 782) {
                     notesLine.trim();
                     notesLine += '...';
@@ -356,17 +366,18 @@ async function createPDF(pdfInfo: invoiceInfo) {
 
                 ctx.fillText(notesLine, x, y);
                 y += 12;
+                x = 55;
                 notesLine = '';
             }
 
             notesLine += str + ' ';
         }
 
-        ctx.font = font(10);
+        console.log(ctx.measureText('Hello World'));
         ctx.fillText(notesLine, x, y);
     }
 
-    function font(size: number, weight = 'normal', name = 'Arial'): string {
+    function font(size: number, weight = 'regular', name = 'Arial'): string {
         return `${weight} ${size}px ${name}`;
     }
 

@@ -6,13 +6,14 @@ declare const api: {
     };
     sql: {
         getAccount: () => Account;
-        getClients: () => Client[];
+        getClients: () => Clients;
         sumProfits: () => number;
         insertNewAccount: (newAccount: Account) => void;
         insertNewClient: (newClient: Client) => void;
     };
     other: {
         logo: () => void;
+        getDBPath: () => string;
     };
     pdf: {
         createPDF: (invoiceInfo: invoiceInfo) => Promise<void>;

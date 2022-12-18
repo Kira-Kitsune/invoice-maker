@@ -2,22 +2,6 @@ import { app, dialog } from 'electron';
 import path from 'path';
 import fs from 'fs';
 
-export function dbPath(): string {
-    let appDataPath: string;
-    switch (process.platform) {
-        case 'darwin':
-            appDataPath = process.env.HOME;
-            break;
-        case 'win32':
-            appDataPath = process.env.APPDATA;
-            break;
-        case 'linux':
-            appDataPath = process.env.HOME;
-            break;
-    }
-    return path.join(appDataPath, 'invoice-maker', 'database.sqlite3');
-}
-
 export function storeLogo() {
     dialog
         .showOpenDialog({

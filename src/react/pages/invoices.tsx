@@ -168,7 +168,7 @@ export const Invoices = () => {
                 <button
                     className="button"
                     type="button"
-                    onClick={() => append({})}
+                    onClick={() => append(defaultRow)}
                     disabled={fields.length === 17}
                 >
                     Add Row

@@ -3,12 +3,22 @@ import path from 'path';
 import fs from 'fs';
 import { storeLogo } from './utils/helpers';
 import { createPDF } from './utils/createInvoice';
+import sqlite from 'better-sqlite3';
+
+import {
+    getAccount,
+    getClients,
+    insertNewAccount,
+    insertNewClient,
+    sumProfits,
+} from './models/queryMGR';
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
-const userDataPath: string = app.getPath('userData');
 
-const dbPath = path.join(userDataPath, 'database.sqlite3');
+const USER_DATA_PATH: string = app.getPath('userData');
+const DB_PATH = path.join(USER_DATA_PATH, 'database.sqlite3');
+const db: sqlite.Database = new sqlite(DB_PATH);
 
 if (require('electron-squirrel-startup')) {
     app.quit();
@@ -16,8 +26,9 @@ if (require('electron-squirrel-startup')) {
 
 let mainWindow: BrowserWindow;
 
-const createWindow = (): void => {
-    fileSetup();
+fileSetup();
+
+const createWindow = () => {
     mainWindow = new BrowserWindow({
         minHeight: 500,
         height: 600,
@@ -64,9 +75,21 @@ ipcMain.on('app/storeLogo', () => storeLogo());
 
 ipcMain.on('app/createPDF', (_, args) => createPDF(args));
 
+ipcMain.on('sql/getAccount', (event) => {
+    event.returnValue = getAccount(db);
+});
+ipcMain.on('sql/getClients', (event) => {
+    event.returnValue = getClients(db);
+});
+ipcMain.on('sql/sumProfits', (event) => {
+    event.returnValue = sumProfits(db);
+});
+ipcMain.on('sql/insertNewAccount', (_, args) => insertNewAccount(db, args));
+ipcMain.on('sql/insertNewClient', (_, args) => insertNewClient(db, args));
+
 function fileSetup(): void {
     try {
-        fs.readFileSync(dbPath);
+        fs.readFileSync(DB_PATH);
     } catch (error) {
         return;
     }

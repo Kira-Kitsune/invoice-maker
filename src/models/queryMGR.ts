@@ -1,10 +1,7 @@
-import sqlite from 'better-sqlite3-with-prebuilds';
-import { dbPath } from '../utils/helpers';
+import sqlite from 'better-sqlite3';
 import { AccountDB, ClientDB, Account, Address, Client } from '../utils/types';
 
-const db = new sqlite(dbPath());
-
-const createAccounts = (): sqlite.RunResult => {
+const createAccounts = (db: sqlite.Database): sqlite.RunResult => {
     const createAccountsStmt = `CREATE TABLE IF NOT EXISTS accounts (
             CompanyName TEXT NOT NULL,
             ContactName TEXT NOT NULL,
@@ -20,7 +17,7 @@ const createAccounts = (): sqlite.RunResult => {
     return res;
 };
 
-const createClients = (): sqlite.RunResult => {
+const createClients = (db: sqlite.Database): sqlite.RunResult => {
     const createClientsStmt = `CREATE TABLE IF NOT EXISTS clients (
             ClientID INTEGER,
             CompanyName TEXT NOT NULL,
@@ -39,8 +36,8 @@ const createClients = (): sqlite.RunResult => {
     return res;
 };
 
-const getClients = (): Client[] => {
-    const check = checkClientsExist();
+const getClients = (db: sqlite.Database): Client[] => {
+    const check = checkClientsExist(db);
 
     if (!check) return null;
 
@@ -68,8 +65,8 @@ const getClients = (): Client[] => {
     return clients;
 };
 
-const getAccount = (): Account => {
-    const check = checkAccountsExist();
+const getAccount = (db: sqlite.Database): Account => {
+    const check = checkAccountsExist(db);
     if (!check) return null;
 
     const getAccountStmt = `SELECT * FROM accounts;`;
@@ -102,8 +99,8 @@ const getAccount = (): Account => {
     };
 };
 
-const insertNewAccount = (account: Account): void => {
-    checkAccountsExist();
+const insertNewAccount = (db: sqlite.Database, account: Account): void => {
+    checkAccountsExist(db);
     const {
         companyName,
         contactName,
@@ -125,13 +122,13 @@ const insertNewAccount = (account: Account): void => {
         contactEmail,
         addressString,
         phoneNumber,
-        websiteURL || 'null',
-        aBN || 'null'
+        websiteURL || null,
+        aBN || null
     );
 };
 
-const insertNewClient = (client: Client): void => {
-    checkClientsExist();
+const insertNewClient = (db: sqlite.Database, client: Client): void => {
+    checkClientsExist(db);
     const {
         companyName,
         contactName,
@@ -154,14 +151,14 @@ const insertNewClient = (client: Client): void => {
         contactEmail,
         addressString,
         phoneNumber,
-        websiteURL || 'null',
-        aBN || 'null',
+        websiteURL || null,
+        aBN || null,
         profits
     );
 };
 
-const sumProfits = () => {
-    checkClientsExist();
+const sumProfits = (db: sqlite.Database) => {
+    checkClientsExist(db);
     const getSumProfits = `SELECT SUM(Profits) FROM clients;`;
     const stmt = db.prepare(getSumProfits);
     const results = stmt.all();
@@ -169,8 +166,8 @@ const sumProfits = () => {
     return results[0]['SUM(Profits)'];
 };
 
-const increaseInvoiceNumber = () => {
-    checkClientsExist();
+const increaseInvoiceNumber = (db: sqlite.Database) => {
+    checkClientsExist(db);
     const getSumProfits = `SELECT SUM(Profits) FROM clients;`;
     const stmt = db.prepare(getSumProfits);
     const results = stmt.all();
@@ -178,25 +175,25 @@ const increaseInvoiceNumber = () => {
     return results[0]['SUM(Profits)'];
 };
 
-function checkAccountsExist(): boolean {
+function checkAccountsExist(db: sqlite.Database): boolean {
     const getAccountsStmt = `SELECT * FROM sqlite_master WHERE type='table' AND name='accounts';`;
     const stmt = db.prepare(getAccountsStmt);
     const check = stmt.all();
 
     if (check.length === 0) {
-        createAccounts();
+        createAccounts(db);
         return false;
     }
     return true;
 }
 
-function checkClientsExist(): boolean {
+function checkClientsExist(db: sqlite.Database): boolean {
     const getClientsStmt = `SELECT * FROM sqlite_master WHERE type='table' AND name='clients';`;
     const stmt = db.prepare(getClientsStmt);
     const check = stmt.all();
 
     if (check.length === 0) {
-        createClients();
+        createClients(db);
         return false;
     }
     return true;
