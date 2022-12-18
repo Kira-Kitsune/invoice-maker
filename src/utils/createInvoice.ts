@@ -76,17 +76,17 @@ async function createPDF(pdfInfo: invoiceInfo) {
             }
         }
 
-        printNotes(ctx, notes);
-        printSummary(ctx, totalPrice);
+        await printNotes(ctx, notes);
+        await printSummary(ctx, totalPrice);
 
-        const args = {
-            buffer: canvas.toBuffer('image/png'),
-            fileName: `INV-${String(invoiceNumber).padStart(5, '0')}-${getDate({
-                splitter: '-',
-            })}-${companyName}.pdf`,
-        };
+        const buffer = canvas.toBuffer('image/png');
 
-        const { buffer, fileName } = args;
+        const fileName = `INV-${String(invoiceNumber).padStart(
+            5,
+            '0'
+        )}-${getDate({
+            splitter: '-',
+        })}-${companyName}.pdf`;
 
         const options = {
             title: 'Save file',
@@ -151,7 +151,7 @@ async function createPDF(pdfInfo: invoiceInfo) {
         y += 14;
         ctx.fillText(`${state}, ${country}`, x, y);
         if (websiteURL && websiteURL !== 'null') {
-            if (!aBN && aBN === 'null') y -= 14;
+            if (!aBN && (aBN || aBN === 'null')) y -= 14;
             ctx.fillText(`WEB: ${websiteURL}`, 380, y);
         }
 
@@ -224,9 +224,7 @@ async function createPDF(pdfInfo: invoiceInfo) {
         x += 5;
         rowY += 15;
 
-        ctx.fillText('Product', x, rowY); // 49
-        x += 95;
-        ctx.fillText('Description', x, rowY); // 71
+        ctx.fillText('Product - Description', x, rowY); // 49
 
         x = 490;
         x -= 15;
@@ -279,9 +277,7 @@ async function createPDF(pdfInfo: invoiceInfo) {
         const textY: number = rowY + 14;
         x = 55;
 
-        ctx.fillText(product, x, textY);
-        x += 95;
-        ctx.fillText(description, x, textY);
+        ctx.fillText(`${product} - ${description}`, x, textY);
         x = 490;
         x -= 12;
         ctx.fillText(String(cost * quantity), x, textY);
@@ -342,7 +338,7 @@ async function createPDF(pdfInfo: invoiceInfo) {
         reset();
         ctx.strokeStyle = 'rgb(100, 100, 100)';
         ctx.fillStyle = 'black';
-        notes = notes.replace(RegExp(/\s/gim), ' ');
+        notes = notes.replaceAll('\n', ' \n ');
 
         x = 50;
         y = 644;
@@ -354,8 +350,9 @@ async function createPDF(pdfInfo: invoiceInfo) {
         let notesLine = '';
         x += 5;
         y += 12;
+        const splitNotes = notes.split(' ');
 
-        for (const str of notes.split(' ')) {
+        for (const str of splitNotes) {
             const testLine = notesLine + ' ' + str;
 
             // Use measureText at a later date when it works, temp work around
@@ -363,9 +360,9 @@ async function createPDF(pdfInfo: invoiceInfo) {
                 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod'
                     .length;
 
-            if (testLine.length >= width) {
+            if (testLine.length >= width || str === '\n') {
+                notesLine = notesLine.trim();
                 if (y > 782) {
-                    notesLine.trim();
                     notesLine += '...';
                     ctx.fillText(notesLine, x, y);
                     notesLine = '';
@@ -381,7 +378,7 @@ async function createPDF(pdfInfo: invoiceInfo) {
             notesLine += str + ' ';
         }
 
-        console.log(ctx.measureText('Hello World'));
+        notesLine = notesLine.trim();
         ctx.fillText(notesLine, x, y);
     }
 

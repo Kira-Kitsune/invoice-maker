@@ -152,7 +152,9 @@ export const Invoices = () => {
                             />
                             <input
                                 style={{ width: '60px', height: '18px' }}
-                                {...register(`invoiceRows.${index}.cost`)}
+                                {...register(`invoiceRows.${index}.cost`, {
+                                    valueAsNumber: true,
+                                })}
                             />
                             <button
                                 style={{ width: '40px', height: '24px' }}
@@ -185,7 +187,11 @@ export const Invoices = () => {
                 />
                 <p className="warning">{errors.dueDate?.message}</p>
                 <br />
-                <textarea {...register(`notes`)} placeholder="Notes" />
+                <textarea
+                    {...register(`notes`)}
+                    placeholder="Notes"
+                    style={{ whiteSpace: 'pre-line' }}
+                />
                 <TotalPrice control={control} />
                 <button className="button" type="submit">
                     Submit
