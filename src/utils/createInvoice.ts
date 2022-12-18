@@ -6,6 +6,7 @@ import {
 import path from 'path';
 import { app, dialog } from 'electron';
 import fs from 'fs';
+import PDFDocument from 'pdfkit';
 
 import { invoiceRow, invoiceInfo, Account, Client } from '../utils/types';
 
@@ -82,7 +83,7 @@ async function createPDF(pdfInfo: invoiceInfo) {
             buffer: canvas.toBuffer('image/png'),
             fileName: `INV-${String(invoiceNumber).padStart(5, '0')}-${getDate({
                 splitter: '-',
-            })}-${companyName}.png`,
+            })}-${companyName}.pdf`,
         };
 
         const { buffer, fileName } = args;
@@ -91,14 +92,21 @@ async function createPDF(pdfInfo: invoiceInfo) {
             title: 'Save file',
             defaultPath: fileName,
             filters: [
-                { name: 'Images', extensions: ['png'] },
+                { name: 'PDF', extensions: ['pdf'] },
                 { name: 'All Files', extensions: ['*'] },
             ],
         };
 
         dialog.showSaveDialog(options).then(({ canceled, filePath }) => {
             if (canceled) return;
-            fs.writeFileSync(filePath, buffer);
+            const pdf = new PDFDocument({ size: 'A4', compress: false });
+            pdf.pipe(fs.createWriteStream(filePath));
+            pdf.image(buffer, 0, 0, {
+                align: 'center',
+                valign: 'center',
+            });
+
+            pdf.end();
         });
     }
 
