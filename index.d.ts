@@ -14,4 +14,7 @@ declare const api: {
     other: {
         logo: () => void;
     };
+    pdf: {
+        createPDF: (invoiceInfo: invoiceInfo) => Promise<void>;
+    };
 };

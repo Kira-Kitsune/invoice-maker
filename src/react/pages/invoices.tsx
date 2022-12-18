@@ -1,13 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useFieldArray, useForm, Control, useWatch } from 'react-hook-form';
-import { Client } from '../../utils/types';
-
-type invoiceRow = {
-    product: string;
-    description: string;
-    quantity: number;
-    cost: number;
-};
+import { Client, invoiceRow, invoiceInfo, Account } from '../../utils/types';
 
 const defaultRow: invoiceRow = {
     product: '',
@@ -15,13 +8,6 @@ const defaultRow: invoiceRow = {
     quantity: 0,
     cost: 0,
 };
-
-interface invoiceInfo {
-    clientId: string;
-    invoiceRows: invoiceRow[];
-    dueDate: string;
-    notes: string;
-}
 
 function RowPrice({
     control,
@@ -40,6 +26,8 @@ function RowPrice({
     return <span style={{ paddingLeft: '10px' }}>${rowTotal}</span>;
 }
 
+let totalPrice = 0;
+
 function TotalPrice({ control }: { control: Control<invoiceInfo> }) {
     const values = useWatch({
         control,
@@ -51,6 +39,8 @@ function TotalPrice({ control }: { control: Control<invoiceInfo> }) {
         (total, { quantity, cost }) => total + (quantity || 0) * (cost || 0),
         0
     );
+
+    totalPrice = total;
 
     return (
         <span
@@ -81,21 +71,32 @@ export const Invoices = () => {
         name: 'invoiceRows',
     });
 
-    const onSubmit = handleSubmit(async (invoiceMaker: invoiceInfo) => {
-        console.log(invoiceMaker);
-        console.log(
+    const onSubmit = handleSubmit(async (invoiceInfo: invoiceInfo) => {
+        const client =
             clients[
                 clients.findIndex(
-                    ({ clientID }) => clientID === Number(invoiceMaker.clientId)
+                    ({ clientID }) =>
+                        clientID === Number(invoiceInfo.client.clientID)
                 )
-            ]
-        );
+            ];
+
+        invoiceInfo.client = client;
+        invoiceInfo.account = account;
+        invoiceInfo.totalPrice = totalPrice;
+
+        try {
+            await api.pdf.createPDF(invoiceInfo);
+        } catch (err) {
+            console.error(err);
+        }
     });
 
+    const [account, setAccount] = useState<Account>(api.sql.getAccount());
     const [clients, setClients] = useState<Client[]>(api.sql.getClients());
 
     useEffect(() => {
         setClients(api.sql.getClients());
+        setAccount(api.sql.getAccount());
     }, []);
 
     return (
@@ -103,7 +104,7 @@ export const Invoices = () => {
             <h2>Invoices</h2>
             <form onSubmit={onSubmit}>
                 <select
-                    {...register(`clientId`, {
+                    {...register(`client.clientID`, {
                         required: 'Please Select a Client',
                     })}
                     className="button"
@@ -112,13 +113,16 @@ export const Invoices = () => {
                     {clients &&
                         clients.map((client) => {
                             return (
-                                <option value={client.clientID}>
+                                <option
+                                    value={client.clientID}
+                                    key={client.clientID}
+                                >
                                     {client.clientID} - {client.companyName}
                                 </option>
                             );
                         })}
                 </select>
-                <p className="warning">{errors.clientId?.message}</p>
+                <p className="warning">{errors.client?.clientID?.message}</p>
                 <div>
                     <span style={{ paddingLeft: '2px', paddingRight: '80px' }}>
                         Product
@@ -161,6 +165,17 @@ export const Invoices = () => {
                         </div>
                     );
                 })}
+                <button
+                    className="button"
+                    type="button"
+                    onClick={() => append({})}
+                    disabled={fields.length === 17}
+                >
+                    Add Row
+                </button>
+                <p className="warning">
+                    Limited to 17 rows, due to current limitations
+                </p>
                 <label>Due Date: </label>
                 <input
                     type="date"
@@ -172,13 +187,6 @@ export const Invoices = () => {
                 <br />
                 <textarea {...register(`notes`)} placeholder="Notes" />
                 <TotalPrice control={control} />
-                <button
-                    className="button"
-                    type="button"
-                    onClick={() => append({})}
-                >
-                    Add Row
-                </button>
                 <button className="button" type="submit">
                     Submit
                 </button>

@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import fs from 'fs';
 import { storeLogo } from './utils/helpers';
+import { createPDF } from './utils/createInvoice';
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
@@ -60,6 +61,8 @@ ipcMain.on('app/maximize', () => {
 });
 
 ipcMain.on('app/storeLogo', () => storeLogo());
+
+ipcMain.on('app/createPDF', (_, args) => createPDF(args));
 
 function fileSetup(): void {
     try {

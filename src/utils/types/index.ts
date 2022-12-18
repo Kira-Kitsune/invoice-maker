@@ -52,3 +52,19 @@ export interface Client {
     profits: string | number;
     invoiceNumber: string | number;
 }
+
+export interface invoiceRow {
+    product: string;
+    description: string;
+    quantity: number;
+    cost: number;
+}
+
+export interface invoiceInfo {
+    account: Account;
+    client: Client;
+    invoiceRows: invoiceRow[];
+    dueDate: string;
+    notes: string;
+    totalPrice: number;
+}
