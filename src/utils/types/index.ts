@@ -53,18 +53,19 @@ export interface Client {
     invoiceNumber: string | number;
 }
 
-export interface invoiceRow {
+export interface pdfRow {
     product: string;
     description: string;
     quantity: number;
     cost: number;
 }
 
-export interface invoiceInfo {
+export interface pdfInfo {
     account: Account;
     client: Client;
-    invoiceRows: invoiceRow[];
-    dueDate: string;
+    rows: pdfRow[];
+    docNumber: number;
+    date: string;
     notes: string;
     totalPrice: number;
 }

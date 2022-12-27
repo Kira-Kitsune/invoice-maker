@@ -1,5 +1,5 @@
 import { ipcRenderer } from 'electron';
-import { Account, Client, invoiceInfo } from '../utils/types';
+import { Account, Client, pdfInfo } from '../utils/types';
 
 export default {
     window: {
@@ -20,7 +20,7 @@ export default {
         logo: () => ipcRenderer.send('app/storeLogo'),
     },
     pdf: {
-        createPDF: (invoiceInfo: invoiceInfo) =>
-            ipcRenderer.send('app/createPDF', invoiceInfo),
+        createPDF: (pdfInfo: pdfInfo, type: 'Invoice' | 'Quote') =>
+            ipcRenderer.send('app/createPDF', [pdfInfo, type]),
     },
 };

@@ -16,6 +16,9 @@ declare const api: {
         getDBPath: () => string;
     };
     pdf: {
-        createPDF: (invoiceInfo: invoiceInfo) => Promise<void>;
+        createPDF: (
+            pdfInfo: pdfInfo,
+            type: 'Invoice' | 'Quote'
+        ) => Promise<void>;
     };
 };

@@ -2,7 +2,7 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import fs from 'fs';
 import { storeLogo } from './utils/helpers';
-import { createPDF } from './utils/createInvoice';
+import { createPDF } from './utils/createPdf';
 import sqlite from 'better-sqlite3';
 
 import {
@@ -73,7 +73,7 @@ ipcMain.on('app/maximize', () => {
 
 ipcMain.on('app/storeLogo', () => storeLogo());
 
-ipcMain.on('app/createPDF', (_, args) => createPDF(args));
+ipcMain.on('app/createPDF', (_, args) => createPDF(args[0], args[1]));
 
 ipcMain.on('sql/getAccount', (event) => {
     event.returnValue = getAccount(db);
